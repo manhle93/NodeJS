@@ -36,6 +36,15 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       },
+      lockedAt: {
+        allowNull: true,
+        type: Sequelize.DATE
+      },
+      isLocked: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE

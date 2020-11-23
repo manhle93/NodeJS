@@ -1,7 +1,7 @@
 var bcrypt = require('bcryptjs');
 const User = require('../models').User
 const { validationResult } = require('express-validator/check');
-const JWT_SECRET = require('../env')
+const JWT_CONFiG = require('../config/jwt')
 const Op = require('sequelize').Op;
 const jwt = require('jsonwebtoken');
 
@@ -20,7 +20,7 @@ class AuthController {
     })
     let checkPass = bcrypt.compareSync(data.password, user.password)
     if (checkPass) {
-      const token = await this.makeToken(user)
+      const token = await this.generateToken(user)
       if (token) {
         return res.status(200).json(token);
       } else {
@@ -32,23 +32,21 @@ class AuthController {
     }
 
   }
-  makeToken = async (user) => {
+  generateToken  = async (user) => {
     try {
-      const timeLifeAccessToken = 3600  //Thời gian sống của access_token tính bằng phút
-      const timeLifeRefreshToken = 3600 * 72 // refresh_token = 72 giờ 
-      const access_token = jwt.sign({ user_id: user.id }, JWT_SECRET, { expiresIn: timeLifeAccessToken });
-      const refresh_token = jwt.sign({ user_id: user.id }, JWT_SECRET, { expiresIn: timeLifeRefreshToken });
+      const access_token = jwt.sign({ user_id: user.id }, JWT_CONFiG.SECRET_KEY, { expiresIn: JWT_CONFiG.AccessTokenTime });
+      const refresh_token = jwt.sign({ user_id: user.id }, JWT_CONFiG.SECRET_KEY, { expiresIn: JWT_CONFiG.RefreshTokenTime });
       let oldToken = JSON.parse(user.tokens)
       if (oldToken === null) {
         oldToken = []
       }
-      oldToken.push({ access_token: access_token, refresh_token: refresh_token })
+      // oldToken.push({ access_token: access_token, refresh_token: refresh_token })
+      oldToken.push(access_token)
       await user.update({
         tokens: JSON.stringify(oldToken)
       })
-      return { message: 'Đăng nhập thành công', access_token: { token: access_token, expiresIn: timeLifeAccessToken + ' min' }, refresh_token: { token: refresh_token, expiresIn: timeLifeRefreshToken + ' min' } }
+      return { message: 'Đăng nhập thành công', access_token: { token: access_token, expiresIn: JWT_CONFiG.AccessTokenTime }, refresh_token: { token: refresh_token, expiresIn: JWT_CONFiG.RefreshTokenTime } }
     } catch (error) {
-      console.log(error)
       return false
     }
 
