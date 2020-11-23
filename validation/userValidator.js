@@ -16,7 +16,7 @@ const userValidator = {
           });
         });
       }),
-      body('email', 'Email không tồn tại').exists(),
+      body('email', 'Email không tồn tại').exists().not().isEmpty(),
       check('email', "Email không hợp lệ").isEmail().custom((value) => {
         return new Promise((resolve, reject) => {
           User.findOne({ where: { email: value } }).then(res => {

@@ -45,6 +45,11 @@ module.exports = {
         defaultValue: false,
         allowNull: false,
       },
+      numberFailedLogin : {
+        allowNull: true,
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+      },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
