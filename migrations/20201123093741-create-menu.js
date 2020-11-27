@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       parentId: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
         allowNull: true
       },
       name: {
@@ -20,6 +20,14 @@ module.exports = {
         allowNull: true
       },
       icon: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      iconColor: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      textColor: {
         type: Sequelize.STRING,
         allowNull: true
       },
