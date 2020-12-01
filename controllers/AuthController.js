@@ -1,6 +1,6 @@
 var bcrypt = require("bcryptjs");
 const User = require("../models").User;
-const {validationResult} = require("express-validator/check");
+const {validationResult} = require("express-validator");
 const JWT_CONFiG = require("../config/jwt");
 const Op = require("sequelize").Op;
 const jwt = require("jsonwebtoken");
@@ -109,6 +109,16 @@ class AuthController {
     const user = req.user;
     await user.update({tokens: null});
     return res.json({message: "Đã đăng xuất trên toàn bộ thiết bị"});
+  };
+  me = async (req, res) => {
+    try {
+      const token = req.header("Authorization").replace("Bearer", "").trim();
+      const decodeJwt = jwt.verify(token, JWT_CONFiG.SECRET_KEY);
+      const user = await User.findOne({where: {id: decodeJwt.user_id}});
+      return res.status(200).json(user);
+    } catch (error) {
+      return res.status(500).json(null);
+    }
   };
 }
 
