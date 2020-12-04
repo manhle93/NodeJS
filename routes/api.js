@@ -14,6 +14,20 @@ router.get("/logout", Auth.auth, AuthController.logout);
 router.get("/logoutall", Auth.auth, AuthController.logoutAllDevice);
 router.get("/me", AuthController.me);
 
+/* Menu Role Router. */
 router.get("/menus", Auth.auth, RoleController.getMenu);
+router.get("/routenames", Auth.auth, RoleController.getRouterName);
+router.post("/addmenu", Auth.auth, RoleController.addMenu);
+router.put("/updatemenu", Auth.auth, RoleController.editMenu);
+router.delete("/deletemenu", Auth.auth, RoleController.deleteMenu);
+
+
+
+
+
+
+
+
+
 
 module.exports = router;

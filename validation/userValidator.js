@@ -41,7 +41,7 @@ const userValidator = {
       body('password', "Vui lòng nhập mật khẩu đăng nhập").exists(),
       body('email_username', "Vui lòng nhập địa chỉ Email hoặc tên đăng nhập").exists(),
     ]
-  }
+  },
 }
 
 module.exports = userValidator
