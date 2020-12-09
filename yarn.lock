@@ -1578,6 +1578,11 @@ sequelize-cli@^6.2.0:
     umzug "^2.3.0"
     yargs "^13.1.0"
 
+sequelize-paginate@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/sequelize-paginate/-/sequelize-paginate-1.1.6.tgz#eb55eae762ed425b3efdc32dbfad378fe7ef6bdb"
+  integrity sha512-PQngK3AFn0WZW09VveD0nf2cfHSKZMbdgfQTDUVRVA8qgidDc9iAwUYb64SVSBlMjXoAhCpewqNdyiSOOF7PvQ==
+
 sequelize-pool@^6.0.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/sequelize-pool/-/sequelize-pool-6.1.0.tgz#caaa0c1e324d3c2c3a399fed2c7998970925d668"

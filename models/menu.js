@@ -1,8 +1,7 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
-const PROTECTED_ATTRIBUTES = ['createdAt', 'updatedAt', 'active']
+"use strict";
+const {Model} = require("sequelize");
+const PROTECTED_ATTRIBUTES = ["createdAt", "updatedAt", "active"];
+const sequelizePaginate = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
   class Menu extends Model {
@@ -11,35 +10,39 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    toJSON () {
+    toJSON() {
       // hide protected fields
-      let attributes = Object.assign({}, this.get())
+      let attributes = Object.assign({}, this.get());
       for (let a of PROTECTED_ATTRIBUTES) {
-        delete attributes[a]
+        delete attributes[a];
       }
-      return attributes
+      return attributes;
     }
     static associate(models) {
-      // Menu.hasMany(models.MenuRole, {
-      //   foreignKey: 'menuId',
-      //   as: 'MenuRoles',
-      // });
-      Menu.hasMany(models.Menu, {
+      Menu.belongsTo(models.Menu, {
         foreignKey: 'parentId',
-        as: 'children',
+        as: 'Parent',
+      });
+      Menu.hasMany(models.Menu, {
+        foreignKey: "parentId",
+        as: "children",
       });
     }
-  };
-  Menu.init({
-    parentId: DataTypes.INTEGER,
-    name: DataTypes.STRING,
-    routerLink: DataTypes.STRING,
-    icon: DataTypes.STRING,
-    active: DataTypes.BOOLEAN,
-    order: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'Menu',
-  });
+  }
+  Menu.init(
+    {
+      parentId: DataTypes.INTEGER,
+      name: DataTypes.STRING,
+      routerLink: DataTypes.STRING,
+      icon: DataTypes.STRING,
+      active: DataTypes.BOOLEAN,
+      order: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "Menu",
+    }
+  );
+  sequelizePaginate.paginate(Menu);
   return Menu;
 };

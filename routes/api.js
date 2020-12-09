@@ -16,11 +16,12 @@ router.get("/me", AuthController.me);
 
 /* Menu Role Router. */
 router.get("/menus", Auth.auth, RoleController.getMenu);
+router.get("/menudashboard", Auth.auth, RoleController.getMenuAdmin);
 router.get("/routenames", Auth.auth, RoleController.getRouterName);
 router.post("/addmenu", Auth.auth, RoleController.addMenu);
 router.put("/updatemenu", Auth.auth, RoleController.editMenu);
 router.delete("/deletemenu", Auth.auth, RoleController.deleteMenu);
-
+router.get("/parentmenu", Auth.auth, RoleController.getParentMenu);
 
 
 

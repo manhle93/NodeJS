@@ -91,6 +91,13 @@ class RoleController {
       return res.status(422).json({message: "Không thể xóa Menu"});
     }
     try {
+      const menu = await Menu.findOne({
+        where: {id: data.id},
+        include: [{model: Menu, as: "children", attributes: ["id", "name"]}],
+      });
+      if(menu.children && menu.children.length){
+        return res.status(401).json({message: "Vui lòng xóa các Menu con trước"});
+      }
       await Menu.destroy({where: {id: data.id}});
       return res.status(200).json({message: "Thành công"});
     } catch (error) {
@@ -105,9 +112,29 @@ class RoleController {
       raw: true, // Thuộc tính raw: true sẽ chuyển collect về Array thuần
       attributes: ["name"],
     });
-    let routerNames = data.map(el => el.name)
-    return res.status(200).json(routerNames)
-  }
+    let routerNames = data.map(el => el.name);
+    return res.status(200).json(routerNames);
+  };
+  getMenuAdmin = async (req, res) => {
+    const page = req.query.page ? req.query.page : 1;
+    const perPage = req.query.perPage ? req.query.perPage : 10;
+    const data = await Menu.paginate({
+      page: page, // Default 1
+      paginate: perPage, // Default 25
+      order: [["updatedAt", "DESC"]],
+      include: [{model: Menu, as: "Parent", attributes: ["name", "icon"]}],
+    });
+    data.currentPage = page;
+    return res.status(200).json(data);
+  };
+  getParentMenu = async (req, res) => {
+    let menus = await Menu.findAll({
+      where: {parentId: null},
+      raw: true,
+      attributes: ["id", "parentId", "icon", "name"],
+    });
+    return res.status(200).json(menus);
+  };
 }
 
 module.exports = new RoleController();
