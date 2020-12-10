@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "parentId",
         as: "children",
       });
+      Menu.hasMany(models.MenuRole, {
+        foreignKey: "menuId",
+        as: "roles",
+      });
     }
   }
   Menu.init(
@@ -37,6 +41,7 @@ module.exports = (sequelize, DataTypes) => {
       icon: DataTypes.STRING,
       active: DataTypes.BOOLEAN,
       order: DataTypes.INTEGER,
+      hidden: DataTypes.BOOLEAN,
     },
     {
       sequelize,

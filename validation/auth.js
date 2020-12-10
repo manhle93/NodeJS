@@ -25,7 +25,8 @@ const Auth = {
       if (error.name == "TokenExpiredError") {
         await Auth.removeExpiredToken(req, res);
       }
-      return res.status(422).json(error);
+      error.code = 403
+      return res.status(403).json(error);
     }
   },
   removeExpiredToken: async (req, res) => {

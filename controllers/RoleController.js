@@ -3,7 +3,7 @@ const Role = require("../models").Role;
 const MenuRole = require("../models").MenuRole;
 const Menu = require("../models").Menu;
 const {Op} = require("sequelize");
-
+var bcrypt = require("bcryptjs");
 class RoleController {
   getMenu = async (req, res) => {
     let user = req.user;
@@ -48,6 +48,14 @@ class RoleController {
         textColor: data.textColor,
         order: data.order,
       });
+      if(data.roles && data.roles.length){
+        for(let item of data.roles){
+          MenuRole.create({
+            roleId: item,
+            menuId: menu.id
+          })
+        }
+      }
       return res.status(200).json({message: "Thành công"});
     } catch (error) {
       console.log(error);
@@ -95,7 +103,7 @@ class RoleController {
         where: {id: data.id},
         include: [{model: Menu, as: "children", attributes: ["id", "name"]}],
       });
-      if(menu.children && menu.children.length){
+      if (menu.children && menu.children.length) {
         return res.status(401).json({message: "Vui lòng xóa các Menu con trước"});
       }
       await Menu.destroy({where: {id: data.id}});
@@ -122,7 +130,7 @@ class RoleController {
       page: page, // Default 1
       paginate: perPage, // Default 25
       order: [["updatedAt", "DESC"]],
-      include: [{model: Menu, as: "Parent", attributes: ["name", "icon"]}],
+      include: [{model: Menu, as: "Parent", attributes: ["name", "icon"]}, {model:MenuRole, as: "roles"}],
     });
     data.currentPage = page;
     return res.status(200).json(data);
@@ -134,6 +142,128 @@ class RoleController {
       attributes: ["id", "parentId", "icon", "name"],
     });
     return res.status(200).json(menus);
+  };
+  getAllRole = async (req, res) => {
+    let data = await Role.findAll();
+    return res.status(200).json(data);
+  };
+  initFirstData = async (req, res) => {
+    let checkUser = await User.findAndCountAll({limit: 1});
+    let checkMenu = await Menu.findAndCountAll({limit: 1});
+    let checRole = await Role.findAndCountAll({limit: 1});
+    let checkRoleMenu = await MenuRole.findAndCountAll({limit: 1});
+    if (checkUser.count || checkMenu.count || checRole.count || checkRoleMenu.count) {
+      return res.status(500).json({message: "Không thể tạo dữ liệu do dã có dữ liệu trong CSDL"});
+    }
+    try {
+      let roles = [
+        {
+          name: "SystemAdmin",
+          code: "sysadmin",
+          description: "Nhà phát triển",
+        },
+        {
+          name: "Admin",
+          code: "admin",
+          description: "Quản trị viên hệ thống",
+        },
+        {
+          name: "Manager",
+          code: "manager",
+          description: "Quản lý nghiệp vụ",
+        },
+      ];
+      let menus = [
+        {
+          name: "Dashboard",
+          icon: "mdi-grid-large",
+        },
+        {
+          name: "Người dùng",
+          icon: "mdi-account",
+          children: [
+            {
+              name: "Menu",
+              icon: "mdi-menu",
+            },
+            {
+              name: "Thông tin",
+              icon: "mdi-information",
+            },
+            {
+              name: "Phân quyền",
+              icon: "mdi-wrench",
+            },
+          ],
+        },
+      ];
+      let users = [
+        {
+          name: "Mạnh Lê",
+          userName: "manhle",
+          email: "manhle@email.com",
+          password: bcrypt.hashSync("12345678", 10),
+          roleId: 1,
+        },
+      ];
+      for (let el of roles) {
+        await Role.create({
+          name: el.name,
+          code: el.code,
+          description: el.description,
+        });
+      }
+
+      for (let el of menus) {
+        if (el.children) {
+          const menu = await Menu.create({
+            parentId: null,
+            name: el.name,
+            icon: el.icon,
+          });
+
+          for (let it of el.children) {
+            await Menu.create({
+              parentId: menu.id,
+              name: it.name,
+              icon: it.icon,
+            });
+          }
+        } else {
+          await Menu.create({
+            parentId: null,
+            name: el.name,
+            icon: el.icon,
+          });
+        }
+      }
+
+      let allMenu = await Menu.findAll({raw: true, attributes: ["id"]});
+      let allRole = await Role.findAll({raw: true, attributes: ["id"]});
+
+      for(let el of allRole){
+        allMenu.forEach(async it => {
+          await MenuRole.create({
+            roleId: el.id,
+            menuId: it.id,
+          });
+        });
+      }
+      var acount = {}
+      for(let el of users){
+         acount = await User.create({
+          name: el.name,
+          userName: el.userName,
+          email: el.email,
+          password: el.password,
+          roleId: el.roleId,
+        });
+      };
+      return res.status(200).json({message: "Thành công", account_login: acount});
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({message: "Không thể tạo dữ liệu", loi: error});
+    }
   };
 }
 

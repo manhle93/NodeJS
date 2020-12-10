@@ -36,6 +36,11 @@ module.exports = {
         defaultValue: true,
         allowNull: true
       },
+      hidden: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+      },
       order: {
         type: Sequelize.INTEGER,
         allowNull: true

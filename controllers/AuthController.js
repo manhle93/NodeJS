@@ -18,6 +18,9 @@ class AuthController {
         [Op.or]: [{email: data.email_username}, {userName: data.email_username}],
       },
     });
+    if(!user){
+      return res.status(422).json({message: "Email hoặc tên đăng nhập không chính xác"});
+    }
     let checkPass = bcrypt.compareSync(data.password, user.password);
     if (checkPass) {
       const token = await this.generateToken(user);
@@ -27,7 +30,7 @@ class AuthController {
         return res.status(500).json({message: "Đăng nhập thất bại"});
       }
     } else {
-      return res.status(422).json({message: "Email, tên đăng nhập hoặc mật khẩu không chính xác"});
+      return res.status(422).json({message: "Mật khẩu không chính xác"});
     }
   };
   generateToken = async user => {
@@ -89,7 +92,7 @@ class AuthController {
       const newToken = await this.generateToken(user);
       return res.status(200).json(newToken);
     } catch (error) {
-      console.log(error);
+      return res.status(500).json(error);
     }
   };
   logout = async (req, res) => {
