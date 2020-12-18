@@ -4,6 +4,7 @@ const MenuRole = require("../models").MenuRole;
 const Menu = require("../models").Menu;
 const {Op} = require("sequelize");
 var bcrypt = require("bcryptjs");
+const {json} = require("sequelize");
 class RoleController {
   getMenu = async (req, res) => {
     let user = req.user;
@@ -17,6 +18,7 @@ class RoleController {
     let parentMenu = await Menu.findAll({
       where: {id: menuID, parentId: null},
       raw: true,
+      order: [["order", "ASC"]],
       attributes: ["id", "parentId", "icon", "name"],
     });
     let menus = [];
@@ -48,12 +50,12 @@ class RoleController {
         textColor: data.textColor,
         order: data.order,
       });
-      if(data.roles && data.roles.length){
-        for(let item of data.roles){
+      if (data.roles && data.roles.length) {
+        for (let item of data.roles) {
           MenuRole.create({
             roleId: item,
-            menuId: menu.id
-          })
+            menuId: menu.id,
+          });
         }
       }
       return res.status(200).json({message: "Thành công"});
@@ -126,11 +128,16 @@ class RoleController {
   getMenuAdmin = async (req, res) => {
     const page = req.query.page ? req.query.page : 1;
     const perPage = req.query.perPage ? req.query.perPage : 10;
+    const search = req.query.search ? req.query.search : null;
     const data = await Menu.paginate({
+      where: search ? {name: {[Op.like]: `%${search}%`}} : {},
       page: page, // Default 1
       paginate: perPage, // Default 25
-      order: [["updatedAt", "DESC"]],
-      include: [{model: Menu, as: "Parent", attributes: ["name", "icon"]}, {model:MenuRole, as: "roles"}],
+      order: [["order", "ASC"]],
+      include: [
+        {model: Menu, as: "Parent", attributes: ["name", "icon", "order"]},
+        {model: MenuRole, as: "roles"},
+      ],
     });
     data.currentPage = page;
     return res.status(200).json(data);
@@ -241,7 +248,7 @@ class RoleController {
       let allMenu = await Menu.findAll({raw: true, attributes: ["id"]});
       let allRole = await Role.findAll({raw: true, attributes: ["id"]});
 
-      for(let el of allRole){
+      for (let el of allRole) {
         allMenu.forEach(async it => {
           await MenuRole.create({
             roleId: el.id,
@@ -249,22 +256,83 @@ class RoleController {
           });
         });
       }
-      var acount = {}
-      for(let el of users){
-         acount = await User.create({
+      var acount = {};
+      for (let el of users) {
+        acount = await User.create({
           name: el.name,
           userName: el.userName,
           email: el.email,
           password: el.password,
           roleId: el.roleId,
         });
-      };
+      }
       return res.status(200).json({message: "Thành công", account_login: acount});
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return res.status(500).json({message: "Không thể tạo dữ liệu", loi: error});
     }
   };
+
+  getMenuForRole = async (req, res) => {
+    const roleId = req.query.roleId;
+    if (!roleId) {
+      return res.status(500).json({message: "Quyền quản trị không tồn tại"});
+    }
+    let menuId = await MenuRole.findAll({where: {roleId: roleId}, raw: true, attributes: ["menuId"]});
+    menuId = menuId.map(el => el.menuId);
+    let parentMenu = await Menu.findAll({
+      where: {parentId: null},
+      order: [["order", "ASC"]],
+      raw: true,
+      attributes: ["name", "icon", "order", "id"],
+    });
+    let childrenMenu = await Menu.findAll({
+      where: {parentId: {[Op.not]: null}},
+      raw: true,
+      attributes: ["id", "parentId", "icon", "name"],
+    });
+    parentMenu = parentMenu.map(el => {
+      if (menuId.includes(el.id)) {
+        return {...el, role: true};
+      } else return {...el, role: false};
+    });
+    childrenMenu = childrenMenu.map(el => {
+      if (menuId.includes(el.id)) {
+        return {...el, role: true};
+      } else return {...el, role: false};
+    });
+    let menus = [];
+    menus = parentMenu.map(el => {
+      let children = childrenMenu.filter(it => it.parentId === el.id);
+      return {
+        ...el,
+        children: children,
+      };
+    });
+
+    return res.status(200).json(menus);
+  };
+  updateMenuRole =  async (req, res) => {
+    const data = req.body;
+    if(!data || !data.roleId){
+      return res.status(500).json({'message': 'Quyền không tồn tại'})
+    }
+    if(data.menu == null){
+      return res.status(500).json({'message': 'Không thể cập nhật'})
+    }
+    try {
+      await MenuRole.destroy({where: {roleId: data.roleId}});
+      for(let item of data.menu){
+        await MenuRole.create({
+          roleId: data.roleId,
+          menuId: item
+        })
+      }
+      return res.status(200).json({'message': 'Thành công'})
+    } catch (error) {
+      return res.status(500).json({'message': 'Không thể cập nhật'})
+    }
+  }
 }
 
 module.exports = new RoleController();

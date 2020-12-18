@@ -27,6 +27,9 @@ router.delete("/deletemenu", Auth.auth, RoleController.deleteMenu);
 router.get("/parentmenu", Auth.auth, RoleController.getParentMenu);
 router.get("/roles", Auth.auth, RoleController.getAllRole);
 
+router.get("/rolemenulist", Auth.auth, RoleController.getMenuForRole);
+router.post("/updaterolemenu", Auth.auth, RoleController.updateMenuRole);
+
 
 
 
