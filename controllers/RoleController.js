@@ -89,6 +89,13 @@ class RoleController {
         },
         {where: {id: data.id}}
       );
+      await MenuRole.destroy({where: {menuId: data.id}});
+      for (let item of data.roles) {
+        await MenuRole.create({
+          roleId: item,
+          menuId: data.id,
+        });
+      }
       return res.status(200).json({message: "Thành công"});
     } catch (error) {
       console.log(error);
@@ -312,27 +319,27 @@ class RoleController {
 
     return res.status(200).json(menus);
   };
-  updateMenuRole =  async (req, res) => {
+  updateMenuRole = async (req, res) => {
     const data = req.body;
-    if(!data || !data.roleId){
-      return res.status(500).json({'message': 'Quyền không tồn tại'})
+    if (!data || !data.roleId) {
+      return res.status(500).json({message: "Quyền không tồn tại"});
     }
-    if(data.menu == null){
-      return res.status(500).json({'message': 'Không thể cập nhật'})
+    if (data.menu == null) {
+      return res.status(500).json({message: "Không thể cập nhật"});
     }
     try {
       await MenuRole.destroy({where: {roleId: data.roleId}});
-      for(let item of data.menu){
+      for (let item of data.menu) {
         await MenuRole.create({
           roleId: data.roleId,
-          menuId: item
-        })
+          menuId: item,
+        });
       }
-      return res.status(200).json({'message': 'Thành công'})
+      return res.status(200).json({message: "Thành công"});
     } catch (error) {
-      return res.status(500).json({'message': 'Không thể cập nhật'})
+      return res.status(500).json({message: "Không thể cập nhật"});
     }
-  }
+  };
 }
 
 module.exports = new RoleController();
