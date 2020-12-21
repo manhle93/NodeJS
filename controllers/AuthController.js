@@ -4,6 +4,7 @@ const {validationResult} = require("express-validator");
 const JWT_CONFiG = require("../config/jwt");
 const Op = require("sequelize").Op;
 const jwt = require("jsonwebtoken");
+const Role = require("../models").Role;
 
 class AuthController {
   login = async (req, res, next) => {
@@ -20,6 +21,9 @@ class AuthController {
     });
     if(!user){
       return res.status(422).json({message: "Email hoặc tên đăng nhập không chính xác"});
+    }
+    if(!user.active){
+      return res.status(401).json({message: "Tài khoản chưa được kích hoạt"});
     }
     let checkPass = bcrypt.compareSync(data.password, user.password);
     if (checkPass) {
@@ -117,7 +121,9 @@ class AuthController {
     try {
       const token = req.header("Authorization").replace("Bearer", "").trim();
       const decodeJwt = jwt.verify(token, JWT_CONFiG.SECRET_KEY);
-      const user = await User.findOne({where: {id: decodeJwt.user_id}});
+      const user = await User.findOne({where: {id: decodeJwt.user_id}, include: [
+        {model: Role, as: "role"},
+      ]});
       return res.status(200).json(user);
     } catch (error) {
       return res.status(500).json(null);

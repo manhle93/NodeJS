@@ -1,5 +1,7 @@
 var express = require("express");
 var router = express.Router();
+var multer  = require('multer')
+var upload = multer({ dest: './public/uploads/avatar' })
 
 const UserController = require("../controllers").UserController;
 const RoleController = require("../controllers").RoleController;
@@ -26,10 +28,14 @@ router.put("/updatemenu", Auth.auth, RoleController.editMenu);
 router.delete("/deletemenu", Auth.auth, RoleController.deleteMenu);
 router.get("/parentmenu", Auth.auth, RoleController.getParentMenu);
 router.get("/roles", Auth.auth, RoleController.getAllRole);
-
 router.get("/rolemenulist", Auth.auth, RoleController.getMenuForRole);
 router.post("/updaterolemenu", Auth.auth, RoleController.updateMenuRole);
 
+/* User Router. */
+router.post("/changepassword", Auth.auth, UserValidator.changePassword(), UserController.changePassword);
+router.get("/users", Auth.auth, UserController.userList);
+router.post("/activeuser", Auth.auth, UserController.activeUser);
+router.post("/uploadavatar", upload.single('avatar'), UserController.uploadAvatar);
 
 
 

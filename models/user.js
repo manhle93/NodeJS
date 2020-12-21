@@ -3,6 +3,7 @@ const {
   Model
 } = require('sequelize');
 const PROTECTED_ATTRIBUTES = ['password', 'tokens']
+const sequelizePaginate = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
@@ -36,11 +37,13 @@ module.exports = (sequelize, DataTypes) => {
     urlImage: DataTypes.STRING,
     tokens: DataTypes.JSON,
     roleId: DataTypes.INTEGER,
+    active: DataTypes.BOOLEAN
   }, 
   {
     sequelize,
     modelName: 'User',
   },
   );
+  sequelizePaginate.paginate(User);
   return User;
 };

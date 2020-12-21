@@ -42,6 +42,13 @@ const userValidator = {
       body('email_username', "Vui lòng nhập địa chỉ Email hoặc tên đăng nhập").exists(),
     ]
   },
+  changePassword: () => {
+    return [
+      body('currentPass', "Mật khẩu hiện tại không thể bỏ trống").not().isEmpty(),
+      body('newPassWord', "Hãy nhập mật khẩu mới").not().isEmpty(),
+      body('reNewPassWord', "Chưa nhập lại mật khẩu mới").not().isEmpty(),
+    ]
+  }
 }
 
 module.exports = userValidator
