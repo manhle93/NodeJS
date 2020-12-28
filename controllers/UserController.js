@@ -2,6 +2,7 @@ const User = require("../models").User;
 const Role = require("../models").Role;
 const {validationResult} = require("express-validator");
 var bcrypt = require("bcryptjs");
+const Op = require("sequelize").Op;
 
 class UserController {
   changePassword = async (req, res) => {
@@ -38,6 +39,7 @@ class UserController {
     const page = req.query.page ? req.query.page : 1;
     const perPage = req.query.perPage ? req.query.perPage : 10;
     const search = req.query.search ? req.query.search : null;
+    const roleId = req.query.roleId ? req.query.roleId : null;
     const data = await User.paginate({
       where: search ? {name: {[Op.like]: `%${search}%`}} : {},
       page: page, // Default 1
@@ -47,6 +49,7 @@ class UserController {
         {model: Role, as: "role"},
       ],
     });
+
     data.currentPage = page;
     return res.status(200).json(data);
   }
