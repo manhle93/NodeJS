@@ -1,2 +1,0 @@
-const JWT_SECRET = 'vn9yKihIiW5ER3cWWgCCmVYUbX2W7JMKLdWcVxFZr-_EfeIiQleT47eloSeNJjXILn14_7cvY_qwvpJSnidWHmQ'
-module.exports = JWT_SECRET
